@@ -1,0 +1,136 @@
+//------------------------------------------------------------------------------
+// Copyright 2016 IBM Corp. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//------------------------------------------------------------------------------
+
+var express = require('express');
+var routes = require('./routes');
+var request = require('request');
+var http = require('http');
+var path = require('path');
+var ibmdb = require('ibm_db');
+var stringify = require('json-stringify');
+require('cf-deployment-tracker-client').track();
+
+
+var app = express();
+
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', path.join(__dirname, 'views'));
+//app.set('view engine', 'jade');
+app.set('view engine', 'ejs');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(express.methodOverride());
+app.use(express.cookieParser('your secret here'));
+app.use(express.session());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+var bodyParser = require('body-parser');
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+var db2;
+var hasConnect = false;
+
+// development only
+if ('development' == app.get('env')) {
+  app.use(express.errorHandler());
+}
+
+if (process.env.VCAP_SERVICES) {
+    var env = JSON.parse(process.env.VCAP_SERVICES);
+	if (env['dashDB']) {
+        hasConnect = true;
+		db2 = env['dashDB'][0].credentials;
+	}
+
+}
+
+if ( hasConnect == false ) {
+
+   db2 = {
+        db: "BLUDB",
+        hostname: "dashdb-entry-yp-dal09-08.services.dal.bluemix.net",
+        port: 50000,
+        username: "dash14416",
+        password: "DqLhD74z_bG_"
+     };
+}
+
+var connString = "DRIVER={DB2};DATABASE=" + db2.db + ";UID=" + db2.username + ";PWD=" + db2.password + ";HOSTNAME=" + db2.hostname + ";port=" + db2.port;
+
+app.use(bodyParser.urlencoded());
+app.get('/', routes.lookupRecords(ibmdb,connString));
+//  app.get('/lookup',routes.lookupRecords(ibmdb,connString));
+
+
+app.get('/new', function(req,res){
+  res.render('new_entry');
+  app.post('/new',routes.addRecord(ibmdb,connString));
+});
+
+
+//app.get('/', routes.listSysTables(ibmdb,connString));
+
+//app.post('/', routes.addRecord(ibmdb,connString));
+
+  // console.log(req)
+  // // console.log("insertIP called",data);
+  //  ibmdb.open(connString, function(err, conn) {
+  //        if (err ) {
+  //           res.send("error occurred " + err.message);
+  //        }
+  //        else {
+  //           // prepare the SQL statement
+  //           conn.prepare("INSERT INTO GOSALESHR.EMPLOYEE(FIRST_NAME,LAST_NAME,EMAIL,WORK_PHONE) VALUES (?,?,?,?)", function(err, stmt) {
+  //              if (err) {
+  //                 //could not prepare for some reason
+  //                 console.log(err);
+  //                 return conn.closeSync();
+  //              }
+  //
+  //              //Bind and Execute the statment asynchronously
+  //              stmt.execute([req ["FIRST_NAME"],req["LAST_NAME"],req["email"],req["phone"]], function (err, result) {
+  //                console.log(err);
+  //                // Close the connection to the database
+  //                conn.close(function(){
+  //                  console.log("Connection Closed");
+  //                });
+  //             });
+  //           });
+  //  };
+  // });
+
+
+
+
+http.createServer(app).listen(app.get('port'), function(){
+console.log('Express server listening on port ' + app.get('port'));
+// ibmdb.open(connString, function (err, connection) {
+//     if (err)
+//     {
+//       console.log(err);
+//       return;
+//     }
+//     connection.query("select * from dash14416.TREADMILL_DATA", function (err1, rows) {
+//       if (err1) console.log(err1);
+//       else console.log(rows);
+//       connection.close(function(err2) {
+//         if(err2) console.log(err2);
+//       });
+//     });
+});
