@@ -9,6 +9,7 @@
     "body-parser": "^1.18.2",
     "cf-deployment-tracker-client": "^0.0.8",
     "ejs": "^2.5.8",
+    "eslint": "^4.19.1",
     "express": "^3.5.3",
     "ibm_db": "^2.0.0",
     "jade": "^1.11.0",

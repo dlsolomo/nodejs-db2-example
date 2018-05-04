@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-// Copyright 2016 IBM Corp. All Rights Reserved.
+// Copyright 2018 IBM Corp. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 var express = require('express');
 var routes = require('./routes');
+var contact = require('./routes/contact')
 var request = require('request');
 var http = require('http');
 var path = require('path');
@@ -66,8 +67,8 @@ if ( hasConnect == false ) {
         db: "BLUDB",
         hostname: "dashdb-entry-yp-dal09-08.services.dal.bluemix.net",
         port: 50000,
-        username: "dash14416",
-        password: "DqLhD74z_bG_"
+        username: "dash14958",
+        password: "zx_XHRK9d9_y"
      };
 }
 
@@ -78,59 +79,18 @@ app.get('/', routes.lookupRecords(ibmdb,connString));
 //  app.get('/lookup',routes.lookupRecords(ibmdb,connString));
 
 
-app.get('/new', function(req,res){
-  res.render('new_entry');
-  app.post('/new',routes.addRecord(ibmdb,connString));
-});
+//app.get('/new', function(req,res){
+//  res.render('new_entry');
+app.post('/new',contact.addContact(ibmdb,connString));
+//});
 
+//app.post('/result', function(req,res))
 
-//app.get('/', routes.listSysTables(ibmdb,connString));
-
-//app.post('/', routes.addRecord(ibmdb,connString));
-
-  // console.log(req)
-  // // console.log("insertIP called",data);
-  //  ibmdb.open(connString, function(err, conn) {
-  //        if (err ) {
-  //           res.send("error occurred " + err.message);
-  //        }
-  //        else {
-  //           // prepare the SQL statement
-  //           conn.prepare("INSERT INTO GOSALESHR.EMPLOYEE(FIRST_NAME,LAST_NAME,EMAIL,WORK_PHONE) VALUES (?,?,?,?)", function(err, stmt) {
-  //              if (err) {
-  //                 //could not prepare for some reason
-  //                 console.log(err);
-  //                 return conn.closeSync();
-  //              }
-  //
-  //              //Bind and Execute the statment asynchronously
-  //              stmt.execute([req ["FIRST_NAME"],req["LAST_NAME"],req["email"],req["phone"]], function (err, result) {
-  //                console.log(err);
-  //                // Close the connection to the database
-  //                conn.close(function(){
-  //                  console.log("Connection Closed");
-  //                });
-  //             });
-  //           });
-  //  };
-  // });
 
 
 
 
 http.createServer(app).listen(app.get('port'), function(){
 console.log('Express server listening on port ' + app.get('port'));
-// ibmdb.open(connString, function (err, connection) {
-//     if (err)
-//     {
-//       console.log(err);
-//       return;
-//     }
-//     connection.query("select * from dash14416.TREADMILL_DATA", function (err1, rows) {
-//       if (err1) console.log(err1);
-//       else console.log(rows);
-//       connection.close(function(err2) {
-//         if(err2) console.log(err2);
-//       });
-//     });
+
 });
